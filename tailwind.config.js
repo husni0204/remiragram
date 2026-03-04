@@ -15,6 +15,11 @@ module.exports = {
         background: "#EBF4F6",
         danger: "#DE1A58",
       },
+      fontFamily: {
+        regular: ["PoppinsRegular"],
+        title: ["ParisienneRegular"],
+        semibold: ["PoppinsSemiBold"],
+      },
     },
   },
   plugins: [],

@@ -8,7 +8,7 @@ const LoginScreen = () => {
     <SafeAreaView className="flex-1 justify-center px-8 bg-background">
       {/* Logo */}
       <View className="items-center">
-        <Text className="text-4xl font-bold text-active">RemiraGram</Text>
+        <Text className="text-4xl font-title text-active">RemiraGram</Text>
         <Text className="text-gray-500 mt-2">Welcome 😀</Text>
       </View>
       {/* Form */}
