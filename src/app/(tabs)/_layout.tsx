@@ -16,10 +16,12 @@ const TabsLayout: FC = () => {
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
           backgroundColor: colors.background,
-          paddingTop: height * 0.04,
+          paddingTop: height * 0.01,
+          height: height * 0.04,
           marginHorizontal: width * 0.05,
           bottom: height * 0.04,
-          borderRadius: buttonSize / 4,
+          borderRadius: buttonSize / 2,
+          position: "absolute",
         },
         headerShown: false,
       }}
@@ -49,15 +51,15 @@ const TabsLayout: FC = () => {
           tabBarIcon: ({ focused }) => (
             <View
               style={{
-                width: width * 0.17,
-                height: width * 0.17,
+                width: width * 0.14,
+                height: width * 0.14,
                 borderRadius: buttonSize / 2,
                 backgroundColor: colors.active,
                 justifyContent: "center",
                 alignItems: "center",
               }}
             >
-              <Feather name="plus" size={30} color={"black"} />
+              <Feather name="plus" size={28} color={"black"} />
             </View>
           ),
         }}
