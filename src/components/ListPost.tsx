@@ -1,26 +1,23 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import { Image, Text, View } from "react-native";
+import { Feed } from "../types/feed";
 import { colors } from "../utils/color";
 
-interface PostData {
-  id: number;
-  username: string;
-  avatar: string;
-  image: string;
-  caption: string;
-}
-
-const ListPost = ({ item }: { item: PostData }) => {
+const ListPost = ({ item }: { item: Feed }) => {
   return (
     <View className="mb-4">
       {/* Post Header */}
       <View className="flex-row items-center px-4 mb-2">
-        <Image
-          source={{ uri: item.avatar }}
-          className="w-10 h-10 rounded-full"
-        />
-        <Text className="ml-3 font-semibold">{item.username}</Text>
+        {item.user.image ? (
+          <Image
+            source={{ uri: item.user.image }}
+            className="w-10 h-10 rounded-full"
+          />
+        ) : (
+          <FontAwesome name="user-circle" size={30} />
+        )}
+        <Text className="ml-3 font-semibold">{item.user.username}</Text>
       </View>
       {/* Post Image */}
       <Image
@@ -39,7 +36,7 @@ const ListPost = ({ item }: { item: PostData }) => {
       {/* Caption */}
       <View className="px-4">
         <Text>
-          <Text className="font-semibold">{item.username} </Text>
+          <Text className="font-semibold">{item.user.username} </Text>
           {item.caption}
         </Text>
       </View>

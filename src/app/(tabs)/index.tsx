@@ -1,94 +1,86 @@
 import Header from "@/src/components/Header";
 import ListPost from "@/src/components/ListPost";
-import { useAuthStore } from "@/src/stores/authStore";
-import { FlatList, Text } from "react-native";
+import customAPI from "@/src/config/api";
+// import { useAuthStore } from "@/src/stores/authStore";
+import { Feed } from "@/src/types/feed";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
-  const { user } = useAuthStore();
+  // const { user } = useAuthStore();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [postData, setPostData] = useState<Feed[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [totalPage, setTotalPage] = useState<number>(1);
 
-  const posts = [
-    {
-      id: 1,
-      username: "husni_dev",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      image: "https://picsum.photos/600/400?random=1",
-      caption: "Exploring new stacks today 🚀",
-    },
-    {
-      id: 2,
-      username: "tech_guru",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      image: "https://picsum.photos/600/400?random=2",
-      caption: "Debugging is like detective work 🔍",
-    },
-    {
-      id: 3,
-      username: "frontend_master",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      image: "https://picsum.photos/600/400?random=3",
-      caption: "CSS can be both art and chaos 🎨",
-    },
-    {
-      id: 4,
-      username: "backend_builder",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      image: "https://picsum.photos/600/400?random=4",
-      caption: "Database tuning night 🌙",
-    },
-    {
-      id: 5,
-      username: "react_native_fan",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      image: "https://picsum.photos/600/400?random=5",
-      caption: "Expo makes life easier 📱",
-    },
-    {
-      id: 6,
-      username: "nextjs_ninja",
-      avatar: "https://i.pravatar.cc/150?img=6",
-      image: "https://picsum.photos/600/400?random=6",
-      caption: "SSR vs SSG, which one today?",
-    },
-    {
-      id: 7,
-      username: "tailwind_artist",
-      avatar: "https://i.pravatar.cc/150?img=7",
-      image: "https://picsum.photos/600/400?random=7",
-      caption: "Utility-first styling FTW 💡",
-    },
-    {
-      id: 8,
-      username: "db_explorer",
-      avatar: "https://i.pravatar.cc/150?img=8",
-      image: "https://picsum.photos/600/400?random=8",
-      caption: "MariaDB config done ✅",
-    },
-    {
-      id: 9,
-      username: "bug_hunter",
-      avatar: "https://i.pravatar.cc/150?img=9",
-      image: "https://picsum.photos/600/400?random=9",
-      caption: "Found the root cause finally 🕵️",
-    },
-    {
-      id: 10,
-      username: "ui_scaler",
-      avatar: "https://i.pravatar.cc/150?img=10",
-      image: "https://picsum.photos/600/400?random=10",
-      caption: "Responsive design is satisfying 📐",
-    },
-  ];
+  const fetchFeed = async () => {
+    // Simulate fetching posts from an API
+    if (loading) return;
+    if (page > totalPage) return;
+    setLoading(true);
+    try {
+      const { data } = await customAPI.get(`/feed?page=${page}&limit=2`);
+      setPostData((prev) => [...prev, ...data.data]);
+      setTotalPage(data.totalPage);
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      console.log("Error fetching feed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setPostData([]);
+    setPage(1);
+    setTotalPage(1);
+    await fetchFeed();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    fetchFeed();
+  }, []);
 
   return (
     <SafeAreaView>
       <Header />
-      <Text>Welcome, {user?.username}!</Text>
+      {/* <Text>Welcome, {user?.username}!</Text> */}
       <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id.toString()}
+        data={postData}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <ListPost item={item} />}
+        onEndReached={fetchFeed}
+        onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+        // ListEmptyComponent={
+        //   !loading ? (
+        //     <View className="items-center">
+        //       <Text className="text-xl font-semibold text-gray-500">
+        //         Tidak ada data Postingan
+        //       </Text>
+        //       <Text className="my-2 text-sm text-gray-500">
+        //         Silahkan follow user lain di halaman search{" "}
+        //         <Feather name="search" size={14} color={colors.active} />
+        //       </Text>
+        //     </View>
+        //   ) : null
+        // }
+        ListFooterComponent={
+          loading ? (
+            <ActivityIndicator size={"large"} style={{ marginVertical: 20 }} />
+          ) : null
+        }
       />
     </SafeAreaView>
   );

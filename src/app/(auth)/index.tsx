@@ -31,8 +31,6 @@ const LoginScreen = () => {
         password: password,
       });
 
-      console.log("ini datanya :", data);
-
       await setTokenData(data.data, data.token);
       Alert.alert("Success", "Berhasil Login");
       router.push("/(tabs)");
