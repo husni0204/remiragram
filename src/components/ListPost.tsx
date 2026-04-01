@@ -17,7 +17,7 @@ const ListPost = ({ item }: { item: Feed }) => {
         ) : (
           <FontAwesome name="user-circle" size={30} />
         )}
-        <Text className="ml-3 font-semibold">{item.user.username}</Text>
+        <Text className="ml-3 font-semibold">{item.user.fullname}</Text>
       </View>
       {/* Post Image */}
       <Image
