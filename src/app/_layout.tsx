@@ -1,6 +1,8 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { useAuthStore } from "../stores/authStore";
 
 export default function RootLayout() {
   // const [fontsLoaded] = useFonts({
@@ -24,12 +26,27 @@ export default function RootLayout() {
     PoppinsSemiBold,
   });
 
-  if (!fontsLoaded) return <View></View>;
+  const { token, isLoading, loadToken, user } = useAuthStore();
+
+  useEffect(() => {
+    loadToken();
+  }, [loadToken, token]);
+
+  if (!fontsLoaded || isLoading) {
+    return (
+      <View className="items-center justify-center flex-1">
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      {/* <Stack.Screen name="(auth)" /> */}
+      {!token || !user ? (
+        <Stack.Screen name="(auth)" />
+      ) : (
+        <Stack.Screen name="(tabs)" />
+      )}
     </Stack>
   );
 }

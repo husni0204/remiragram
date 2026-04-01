@@ -34,5 +34,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  removeToken: async () => {},
+  removeToken: async () => {
+    await AsyncStorage.removeItem("auth");
+    set({ token: null, user: null });
+  },
 }));

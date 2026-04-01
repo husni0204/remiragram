@@ -4,7 +4,7 @@ import axios from "axios";
 const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
 const customAPI = axios.create({
-  baseURL: baseURL,
+  baseURL: baseURL + "/api",
 });
 
 customAPI.interceptors.request.use(async (config) => {

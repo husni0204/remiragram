@@ -1,9 +1,12 @@
+import Header from "@/src/components/Header";
 import ListPost from "@/src/components/ListPost";
-import React from "react";
-import { FlatList } from "react-native";
+import { useAuthStore } from "@/src/stores/authStore";
+import { FlatList, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const index = () => {
+const Index = () => {
+  const { user } = useAuthStore();
+
   const posts = [
     {
       id: 1,
@@ -79,6 +82,8 @@ const index = () => {
 
   return (
     <SafeAreaView>
+      <Header />
+      <Text>Welcome, {user?.username}!</Text>
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id.toString()}
@@ -89,4 +94,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
