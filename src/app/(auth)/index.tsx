@@ -49,17 +49,35 @@ const LoginScreen = () => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <SafeAreaView className="justify-center flex-1 px-8 bg-background">
+      <SafeAreaView className="
+        android:justify-center
+        android:flex-1
+        android:px-8
+        ios:justify-center
+        ios:flex-1
+        ios:px-8
+        bg-background"
+      >
         {/* Logo */}
-        <View className="items-center">
-          <Text className="text-4xl font-title text-active">RemiraGram</Text>
+        <View className="android:items-center ios:items-center">
+          <Text className="
+            android:text-4xl
+            android:font-title
+            android:text-active
+            ios:pt-3
+            ios:text-6xl
+            ios:font-title
+            ios:text-active"
+          >
+            RemiraGram
+          </Text>
           <Text className="mt-2 text-gray-500">Welcome 😀</Text>
         </View>
         {/* Form */}
         <View className="mt-5">
           <TextInput
             placeholder="Email"
-            className="px-4 mb-4 bg-gray-300 rounded-xl"
+            className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -67,7 +85,7 @@ const LoginScreen = () => {
           />
           <TextInput
             placeholder="Password"
-            className="px-4 mb-4 bg-gray-300 rounded-xl"
+            className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
