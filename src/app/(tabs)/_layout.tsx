@@ -2,8 +2,10 @@
 // import { Feather } from "@expo/vector-icons";
 // import {Icon, Label, Tabs} from "expo-router";
 import { FC } from "react";
-import { Dimensions } from "react-native";
-import {NativeTabs} from "expo-router/build/native-tabs";
+import {Dimensions, DynamicColorIOS} from "react-native";
+import { NativeTabs } from "expo-router/build/native-tabs/NativeTabs";
+import {colors} from "@/src/utils/color";
+
 
 const TabsLayout: FC = () => {
   const { width, height } = Dimensions.get("window");
@@ -86,9 +88,16 @@ const TabsLayout: FC = () => {
     // </Tabs>
 
     <NativeTabs
-        // disableTransparentOnScrollEdge={true}
-        // tintColor={"yellow"}
-        // minimizeBehavior={"onScrollDown"}
+        labelStyle={{
+          color: DynamicColorIOS({
+            dark: "white",
+            light: colors.inactive
+          })
+        }}
+        tintColor={DynamicColorIOS({
+          dark: "white",
+          light: colors.active
+        })}
     >
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
