@@ -56,13 +56,31 @@ const index = () => {
     fetchFeed();
   }, []);
 
+// Hilangkan duplikat berdasarkan id
+const uniquePosts = [
+  ...new Map(postData.map(item => [item.id, item])).values()
+];
+
+// Cari ID duplikat di postData
+// const ids = postData.map(item => item.id);
+// const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+
+// if (duplicates.length > 0) {
+//   console.log("Duplikat ID ditemukan:", duplicates);
+// } else {
+//   console.log("Tidak ada duplikat ID");
+// }
+
+
   return (
     <SafeAreaView>
       <Header />
       <Text>Welcome, {user?.fullname}!</Text>
       <FlatList
-        data={postData}
-        keyExtractor={(item) => item.id.toString()}
+        data={uniquePosts}
+        windowSize={5}
+        // keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <ListPost item={item} />}
         onEndReached={fetchFeed}

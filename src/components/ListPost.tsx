@@ -1,13 +1,24 @@
 import { Feather, FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Feed } from "../types/feed";
 import { colors } from "../utils/color";
 
 const ListPost = ({ item }: { item: Feed }) => {
+  const router = useRouter();
+
   return (
     <View className="mb-4">
       {/* Post Header */}
+      <TouchableOpacity 
+        onPress={() => 
+          router.push({
+            pathname: "/(detail)/post/[id]",
+            params: {id: item.id}
+          })
+        }
+      >
       <View className="flex-row items-center px-4 mb-2">
         {item.user.image ? (
           <Image
@@ -17,7 +28,7 @@ const ListPost = ({ item }: { item: Feed }) => {
         ) : (
           <FontAwesome name="user-circle" size={30} />
         )}
-        <Text className="ml-3 font-semibold">{item.user.fullname}</Text>
+        <Text className="ml-3 font-semibold">{item.user.username}</Text>
       </View>
       {/* Post Image */}
       <Image
@@ -40,6 +51,7 @@ const ListPost = ({ item }: { item: Feed }) => {
           {item.caption}
         </Text>
       </View>
+      </TouchableOpacity>
     </View>
   );
 };
