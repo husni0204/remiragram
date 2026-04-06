@@ -4,17 +4,20 @@ import FormatDate from "@/src/config/date";
 import { useAuthStore } from "@/src/stores/authStore";
 import { DetailFeed } from "@/src/types/feed";
 import { colors } from "@/src/utils/color";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const DetailFeedScreen = () => {
   const { id } = useLocalSearchParams();
@@ -24,6 +27,7 @@ const DetailFeedScreen = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [post, setPost] = useState<DetailFeed>();
+  const [content, setContent] = useState<string>("");
 
   const detailPostData = async () => {
     setLoading(true);
@@ -35,6 +39,29 @@ const DetailFeedScreen = () => {
       console.log("ini error", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateComment = async () => {
+    try {
+      await customAPI.post("/comment", {
+        content,
+        postId: id,
+      });
+      setContent("");
+      detailPostData();
+    } catch (error) {
+      console.log("ini error", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await customAPI.delete(`/comment/${commentId}`);
+      Alert.alert("Delete", "Berhasil menghapus komentar");
+      detailPostData();
+    } catch (error: any) {
+      console.log("ini error", error.message);
     }
   };
 
@@ -51,7 +78,7 @@ const DetailFeedScreen = () => {
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       {/* header navigation back */}
       <View className="flex-row items-center justify-between px-4 pb-4 border-b border-gray-100 pt-14">
         <TouchableOpacity onPress={() => router.back()}>
@@ -124,7 +151,11 @@ const DetailFeedScreen = () => {
                       </Text>
                     </View>
                     {user?.id === item.user.id && (
-                      <Feather name="trash" size={15} color={"red"} />
+                      <TouchableOpacity
+                        onPress={() => handleDeleteComment(item.id)}
+                      >
+                        <Feather name="trash" size={15} color={"red"} />
+                      </TouchableOpacity>
                     )}
                   </View>
                 ))}
@@ -134,8 +165,19 @@ const DetailFeedScreen = () => {
             )}
           </View>
         </ScrollView>
+        <View className="flex-row items-center px-4 py-3 bg-white border-t border-gray-100">
+          <TextInput
+            placeholder="Add comment.."
+            className="flex-1 px-4 py-3 mr-3 bg-gray-100 rounded-full"
+            value={content}
+            onChangeText={setContent}
+          />
+          <TouchableOpacity onPress={handleCreateComment}>
+            <Ionicons name="send" size={22} color={colors.active} />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
