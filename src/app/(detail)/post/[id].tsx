@@ -61,7 +61,7 @@ const DetailFeedScreen = () => {
       Alert.alert("Delete", "Berhasil menghapus komentar");
       detailPostData();
     } catch (error: any) {
-      console.log("ini error", error.message);
+      console.log("salahnya :", error.message);
     }
   };
 
