@@ -1,7 +1,7 @@
 import { User } from "./auth";
 
 export interface Feed {
-  id: string;
+  id: number;
   caption: string;
   commentCount: number;
   createdAt: Date;
@@ -20,7 +20,7 @@ export interface Comment {
 }
 
 export interface DetailFeed {
-  id: string;
+  id: number;
   caption: string;
   commentCount: number;
   createdAt: Date;
