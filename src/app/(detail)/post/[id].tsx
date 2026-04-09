@@ -126,7 +126,7 @@ const DetailFeedScreen = () => {
     >
       <SafeAreaView className="flex-1 bg-background">
         {/* header navigation back */}
-        <View className="flex-row items-center justify-between px-4 pb-4 border-b border-gray-100 pt-14">
+        <View className="flex-row items-center justify-between px-4 pb-4 border-b border-gray-100 ios:pt-6 android:pt-8">
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" size={24} color={"#111"} />
           </TouchableOpacity>
