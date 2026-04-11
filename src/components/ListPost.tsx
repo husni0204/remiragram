@@ -37,8 +37,10 @@ const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void
         )}
           <Link
               className="ml-3"
-              href={{
+              href={user?.id !== item.user.id ? {
                   pathname: '/(detail)/(user)/[username]', params: {username: item.user.username},
+              }: {
+                  pathname: '/(tabs)/profile'
               }}
           >
             <Text className="font-semibold">{item.user.username}</Text>

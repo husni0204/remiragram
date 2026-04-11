@@ -8,6 +8,9 @@ import {Feather} from "@expo/vector-icons";
 import {DetailUserType} from "@/src/types/user";
 import UserProfileHeader from "@/src/components/post/UserProfileHeader";
 import UserInfo from "@/src/components/post/UserInfo";
+import ButtonFollow from "@/src/components/post/ButtonFollow";
+import UserProfileTab from "@/src/components/post/UserProfileTab";
+import PostCard from "@/src/components/post/PostCard";
 
 
 const DetailUserScreen: FC = () => {
@@ -81,13 +84,25 @@ const DetailUserScreen: FC = () => {
                         fullname={detailUserData.fullname}
                         bio={detailUserData.bio}
                     />
+                    <ButtonFollow userId={detailUserData.id}/>
+                    <UserProfileTab tab={tab} setTab={setTab}/>
                 </>
                 }
                 renderItem={({ item }) => (
-                    <View>
-                        <Text>{item.caption}</Text>
-                    </View>
+                    <PostCard id={item.id} caption={item.caption} image={item.image}/>
                 )}
+                ListEmptyComponent={
+                    <View className="items-center justify-center py-20">
+                        <View className="items-center font-semibold">
+                            <Text className="text-lg font-semibold">
+                                {tab === "posts" ? "Belum ada postingan" : "Belum ada bookmarks"}
+                            </Text>
+                            <Text className="text-gray-400 mt-2">
+                                {tab === "posts" ? "Postingan akan muncul disini" : "Simpan agar postingan muncul disini"}
+                            </Text>
+                        </View>
+                    </View>
+                }
             />
         </SafeAreaView>
     )
