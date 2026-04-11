@@ -82,7 +82,7 @@ const uniquePosts = [
         // keyExtractor={(item) => item.id.toString()}
         keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <ListPost item={item} />}
+        renderItem={({ item }) => <ListPost item={item} onReload={handleRefresh} />}
         onEndReached={fetchFeed}
         onEndReachedThreshold={0.5}
         refreshControl={
