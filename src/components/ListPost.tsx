@@ -1,5 +1,5 @@
 import { Feather, FontAwesome } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import {Link, useRouter} from "expo-router";
 import React from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import customAPI from "../config/api";
@@ -35,10 +35,17 @@ const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void
         ) : (
           <FontAwesome name="user-circle" size={30} />
         )}
-        <Text className="ml-3 font-semibold">{item.user.username}</Text>
+          <Link
+              className="ml-3"
+              href={{
+                  pathname: '/(detail)/(user)/[username]', params: {username: item.user.username},
+              }}
+          >
+            <Text className="font-semibold">{item.user.username}</Text>
+          </Link>
       </View>
       {user?.id === item.user.id && (
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => handleDeletePost(item.id.toString())}
           className="px-4 py-3"
         >
@@ -46,8 +53,8 @@ const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void
         </TouchableOpacity>
       )}
       </View>
-      <TouchableOpacity 
-        onPress={() => 
+      <TouchableOpacity
+        onPress={() =>
           router.push({
             pathname: "/(detail)/post/[id]",
             params: {id: item.id}
