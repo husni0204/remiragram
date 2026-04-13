@@ -38,7 +38,7 @@ const LoginScreen = () => {
       const errorMsg = error.response.data.message;
       const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
       Alert.alert("Error", errorData);
-      console.log("ini errornya :", error);
+      // console.log("ini errornya :", error);
     } finally {
       setLoading(false);
     }
@@ -49,26 +49,10 @@ const LoginScreen = () => {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <SafeAreaView className="
-        android:justify-center
-        android:flex-1
-        android:px-8
-        ios:justify-center
-        ios:flex-1
-        ios:px-8
-        bg-background"
-      >
+      <SafeAreaView className=" android:justify-center android:flex-1 android:px-8 ios:justify-center ios:flex-1 ios:px-8 bg-background">
         {/* Logo */}
         <View className="android:items-center ios:items-center">
-          <Text className="
-            android:text-4xl
-            android:font-title
-            android:text-active
-            ios:pt-3
-            ios:text-6xl
-            ios:font-title
-            ios:text-active"
-          >
+          <Text className=" android:text-4xl android:font-title android:text-active ios:pt-3 ios:text-6xl ios:font-title ios:text-active">
             RemiraGram
           </Text>
           <Text className="mt-2 text-gray-500">Welcome 😀</Text>
