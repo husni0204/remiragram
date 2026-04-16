@@ -1,4 +1,5 @@
 import Header from "@/src/components/Header";
+import ListUser from "@/src/components/ListUser";
 import customAPI from "@/src/config/api";
 import { User } from "@/src/types/auth";
 import { colors } from "@/src/utils/color";
@@ -21,7 +22,7 @@ const SearchScreen = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 500);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [query]);
@@ -79,7 +80,7 @@ const SearchScreen = () => {
       <FlatList
         data={users}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text>{item.username}</Text>}
+        renderItem={({ item }) => <ListUser item={item} />}
         ListEmptyComponent={
           !loading && debouncedQuery ? (
             <View className="items-center mt-10">
