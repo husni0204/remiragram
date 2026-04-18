@@ -1,0 +1,23 @@
+# Ignore artifacts:
+build
+coverage
+.expo
+.idea
+.vscode
+assets
+node_modules
+.env
+.prettierignore
+.prettierrc
+app.json
+babel.config.js
+eslint.config.js
+expo-env.d.ts
+global.css
+metri.config.js
+nativewind-env.d.ts
+package.json
+README.md
+tailwind.config.js
+tsconfig.json
+yarn.lock
