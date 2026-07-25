@@ -1,0 +1,4 @@
+## 2026-07-26
+- Fixed merge conflict in `package.json` - resolved version conflicts between HEAD and remote, keeping newer expo package versions
+- Deleted `yarn.lock` and regenerated with `npm install` to resolve lockfile conflict
+- Merged remote-tracking branch 'origin/main'
