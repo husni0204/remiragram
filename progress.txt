@@ -2,3 +2,37 @@
 - Fixed merge conflict in `package.json` - resolved version conflicts between HEAD and remote, keeping newer expo package versions
 - Deleted `yarn.lock` and regenerated with `npm install` to resolve lockfile conflict
 - Merged remote-tracking branch 'origin/main'
+- Fixed `src/stores/authStore.ts` - `setTokenData` now updates zustand state with `set({ user, token })` in addition to AsyncStorage, fixing `user: undefined` after login
+- Fixed `src/app/(tabs)/index.tsx` - Fixed infinite scroll race conditions using `useRef` for loading guard, added explicit page/reset params to `fetchFeed`, fixed `handleRefresh` to properly reset state
+- Created `src/stores/toastStore.ts` - Zustand store for toast state management with show/hide and auto-dismiss after 3s
+- Created `src/components/Toast.tsx` - Custom toast component with NativeWind styling, animated with fade in/out, supports success/error/info types
+- Modified `src/app/_layout.tsx` - Added Toast component to root layout
+- Modified `src/app/(auth)/index.tsx` - Replaced `Alert.alert()` with toast for login feedback
+- Modified `src/app/(auth)/register.tsx` - Replaced `Alert.alert()` with toast for register feedback
+- Modified `src/app/(tabs)/create.tsx` - Replaced `Alert.alert()` with toast for create post feedback
+- Modified `src/app/(tabs)/update.tsx` - Replaced `Alert.alert()` with toast for profile update feedback
+- Modified `src/components/ListPost.tsx` - Replaced `Alert.alert()` with toast for delete post feedback
+- Modified `src/components/Header.tsx` - Replaced `Alert.alert()` with toast for logout feedback
+- Modified `src/app/(detail)/post/[id].tsx` - Replaced `Alert.alert()` with toast for delete comment feedback
+- Created `src/stores/confirmStore.ts` - Zustand store for confirmation modal state management
+- Created `src/components/ConfirmModal.tsx` - Custom confirmation modal with NativeWind styling, supports Batal/Lanjut buttons
+- Modified `src/app/_layout.tsx` - Added ConfirmModal component to root layout
+- Modified `src/components/Header.tsx` - Added confirmation dialog before logout
+- Modified `src/components/ListPost.tsx` - Added confirmation dialog before deleting post
+- Modified `src/app/(detail)/post/[id].tsx` - Added confirmation dialog before deleting comment
+- Modified `src/components/Header.tsx` - Upgraded with shadow, camera icon, styled logout button
+- Created `src/components/WelcomeBanner.tsx` - Gradient banner with avatar, greeting based on time of day
+- Modified `src/components/ListPost.tsx` - Upgraded with card styling, shadow, rounded image, better spacing
+- Created `src/components/EmptyState.tsx` - Illustration with icon, message, and CTA button to search
+- Created `src/components/SkeletonPost.tsx` - Animated skeleton placeholder for loading state
+- Modified `src/app/(tabs)/index.tsx` - Integrated all new components, added initialLoad state, improved FlatList styling
+- Modified `src/app/_layout.tsx` - Added StatusBar with translucent mode for edge-to-edge
+- Modified `src/components/Header.tsx` - Upgraded to edge-to-edge with useSafeAreaInsets, white icons on active background
+- Modified `src/app/(tabs)/index.tsx` - Changed SafeAreaView to View, Header now handles status bar padding
+- Modified `app.json` - Added statusBar config (translucent, transparent), updated splash screen and adaptive icon background to brand color
+- Modified `src/app/(detail)/post/[id].tsx` - Complete UI overhaul: edge-to-edge header with useSafeAreaInsets, skeleton loading animation, user info with avatar and username, actions using ButtonLike/ButtonBookmark, styled comments with avatars, comment input with avatar and send button, empty comments with icon and message
+- Modified `src/app/(tabs)/search.tsx` - Upgraded to edge-to-edge, styled search input with icon, empty state with icon
+- Modified `src/app/(tabs)/create.tsx` - Upgraded to edge-to-edge, styled image upload with dashed border, form cards with shadow
+- Modified `src/app/(tabs)/profile.tsx` - Upgraded to edge-to-edge, empty state with icon
+- Modified `src/app/(tabs)/update.tsx` - Upgraded to edge-to-edge, styled form inputs with cards, photo upload with camera icon
+- Modified `src/app/(detail)/(user)/[username].tsx` - Upgraded to edge-to-edge header with useSafeAreaInsets, skeleton loading, empty state with icon

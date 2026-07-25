@@ -3,9 +3,9 @@ import ListUser from "@/src/components/ListUser";
 import customAPI from "@/src/config/api";
 import { User } from "@/src/types/auth";
 import { colors } from "@/src/utils/color";
+import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const SearchScreen = () => {
     const [query, setQuery] = useState("");
@@ -45,12 +45,24 @@ const SearchScreen = () => {
     }, [debouncedQuery]);
 
     return (
-        <SafeAreaView>
+        <View className="flex-1 bg-gray-50">
             <Header />
-            <Text className="font-semibold text-2xl text-center my-3">Searching User by Username</Text>
+            <View className="px-4 mt-4 mb-2">
+                <Text className="font-bold text-xl text-gray-900">Cari Pengguna</Text>
+                <Text className="text-gray-500 text-sm mt-1">Temukan teman untuk di-follow</Text>
+            </View>
             {/* Inputan Searching */}
             <View className="px-4 mb-3">
-                <TextInput placeholder="cari username ... " value={query} onChangeText={setQuery} className="bg-gray-100 p-4 rounded-xl mb-4 text-base border" />
+                <View className="flex-row items-center bg-white rounded-xl border border-gray-200 px-4">
+                    <Feather name="search" size={18} color={colors.inactive} />
+                    <TextInput
+                        placeholder="Cari username..."
+                        value={query}
+                        onChangeText={setQuery}
+                        className="flex-1 py-4 ml-3 text-base"
+                        placeholderTextColor="#9CA3AF"
+                    />
+                </View>
             </View>
             {/* Loading */}
             {loading && <ActivityIndicator size={"large"} color={colors.active} className="mt-5" />}
@@ -60,15 +72,20 @@ const SearchScreen = () => {
                 data={users}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => <ListUser item={item} />}
+                contentContainerStyle={{ paddingBottom: 20 }}
                 ListEmptyComponent={
                     !loading && debouncedQuery ? (
-                        <View className="items-center mt-10">
-                            <Text className="text-gray-500">User tidak ditemukan !</Text>
+                        <View className="items-center mt-16">
+                            <View className="w-20 h-20 rounded-full bg-gray-100 items-center justify-center mb-4">
+                                <Feather name="user-x" size={32} color={colors.inactive} />
+                            </View>
+                            <Text className="text-gray-600 font-medium">User tidak ditemukan</Text>
+                            <Text className="text-gray-400 text-sm mt-1">Coba kata kunci lain</Text>
                         </View>
                     ) : null
                 }
             />
-        </SafeAreaView>
+        </View>
     );
 };
 

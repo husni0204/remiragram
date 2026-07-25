@@ -1,8 +1,9 @@
 import customAPI from "@/src/config/api";
 import { useAuthStore } from "@/src/stores/authStore";
+import { useToastStore } from "@/src/stores/toastStore";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const RegisterScreen = () => {
@@ -15,6 +16,7 @@ const RegisterScreen = () => {
     const router = useRouter();
 
     const { setTokenData } = useAuthStore();
+    const toast = useToastStore((s) => s.show);
 
     const handleRegister = async () => {
         setLoading(true);
@@ -27,13 +29,12 @@ const RegisterScreen = () => {
             });
 
             await setTokenData(data.data, data.token);
-            Alert.alert("Success", "Berhasil Register!");
+            toast("Berhasil Register!", "success");
             router.push("/(tabs)");
         } catch (error: any) {
             const errorMsg = error.response.data.message;
             const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
-            Alert.alert("Error", errorData);
-            console.log("ini errornya :", error);
+            toast(errorData, "error");
         } finally {
             setLoading(false);
         }

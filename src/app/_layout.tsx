@@ -1,5 +1,8 @@
+import ConfirmModal from "@/src/components/ConfirmModal";
+import Toast from "@/src/components/Toast";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "../stores/authStore";
@@ -40,5 +43,12 @@ export default function RootLayout() {
         );
     }
 
-    return <Stack screenOptions={{ headerShown: false }}>{!token || !user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}</Stack>;
+    return (
+        <View className="flex-1">
+            <StatusBar style="light" translucent backgroundColor="transparent" />
+            <Toast />
+            <ConfirmModal />
+            <Stack screenOptions={{ headerShown: false }}>{!token || !user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}</Stack>
+        </View>
+    );
 }
