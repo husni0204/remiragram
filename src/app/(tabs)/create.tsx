@@ -1,12 +1,61 @@
 import Header from "@/src/components/Header";
 import customAPI from "@/src/config/api";
 import { Feather } from "@expo/vector-icons";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Client-side image cap applied BEFORE upload so we don't ship 12-50MP
+// originals to the server. Longest side <= MAX_DIMENSION, JPEG re-encoded
+// at UPLOAD_QUALITY. Keeps upload payloads ~1-2 MB for a typical phone
+// photo while staying sharp for a social feed (feed renders <= 1080px).
+const MAX_DIMENSION = 1080;
+const UPLOAD_QUALITY = 0.7;
+
+// Downscale the picked/captured image so the longest side is <= MAX_DIMENSION
+// and re-encode it as JPEG at UPLOAD_QUALITY. Used for BOTH the gallery pick
+// and the camera capture so the uploaded file is never the multi-megapixel
+// original. Returns the original URI if the image is already within the cap
+// or if the manipulator fails (never block the user on a resize hiccup).
+const resizeImage = async (uri: string): Promise<string> => {
+  try {
+    // Determine the true source dimensions without a full decode.
+    const size = await new Promise<{ width: number; height: number }>(
+      (resolve, reject) =>
+        Image.getSize(uri, (w, h) => resolve({ width: w, height: h }), reject)
+    );
+
+    // Already small enough — keep the original (quality re-encode was already
+    // applied by the picker via `quality: UPLOAD_QUALITY`).
+    if (Math.max(size.width, size.height) <= MAX_DIMENSION) {
+      return uri;
+    }
+
+    const scale = MAX_DIMENSION / Math.max(size.width, size.height);
+    const targetW = Math.round(size.width * scale);
+    const targetH = Math.round(size.height * scale);
+
+    const { uri: outUri } = await ImageManipulator.manipulateAsync(
+      uri,
+      [
+        {
+          resize: { width: targetW },
+        },
+      ],
+      { compress: UPLOAD_QUALITY, format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    void targetH; // Specifying only width preserves aspect ratio automatically.
+    return outUri;
+  } catch (e) {
+    console.log("resizeImage: keeping original on failure", e);
+    return uri;
+  }
+};
 
 const CreateScreen = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -18,11 +67,12 @@ const CreateScreen = () => {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 1,
+      quality: UPLOAD_QUALITY,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setImage(await resizeImage(uri));
     }
   };
 
@@ -36,11 +86,12 @@ const CreateScreen = () => {
 
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
-      quality: 1,
+      quality: UPLOAD_QUALITY,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setImage(await resizeImage(uri));
     }
   };
 

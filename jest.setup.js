@@ -25,3 +25,11 @@ jest.mock('expo-router', () => ({
 jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
+
+// Mock expo-image-manipulator (used by the create-post screen to downscale
+// picked/captured photos to MAX_DIMENSION before upload).
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn(() => Promise.resolve({ uri: 'mock://resized.jpg', width: 1080, height: 1080 })),
+  SaveFormat: { JPEG: 'jpeg', PNG: 'png', WEBP: 'webp' },
+  FlipType: { Vertical: 'vertical', Horizontal: 'horizontal' },
+}));
