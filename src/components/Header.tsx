@@ -1,24 +1,41 @@
 import { Feather } from "@expo/vector-icons";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useAuthStore } from "../stores/authStore";
+import { useRouter } from "expo-router";
+import CustomAlert from "./CustomAlert";
+import { useState } from "react";
 
 const Header = () => {
     const { removeToken } = useAuthStore();
+    const router = useRouter();
+    const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
     const handleLogout = async () => {
         try {
             await removeToken();
-            Alert.alert("Keluar", "Kamu berhasil keluar dari akunmu!");
+            setLogoutModalVisible(false);
+            router.replace("/"); // Redirect to login
         } catch (error) {
             console.log("Error during logout:", error);
+            setLogoutModalVisible(false);
         }
     };
 
     return (
         <View className="flex-row items-center justify-between px-2 py-5 bg-background">
             <Text className="text-3xl text-black font-title">RemiraGram</Text>
-            <TouchableOpacity onPress={handleLogout}>
+            <TouchableOpacity onPress={() => setLogoutModalVisible(true)}>
                 <Feather name="arrow-left-circle" color={"red"} size={30} />
             </TouchableOpacity>
+
+            <CustomAlert
+                isVisible={isLogoutModalVisible}
+                title="Keluar"
+                message="Apakah Anda yakin ingin keluar dari akun Anda?"
+                onCancel={() => setLogoutModalVisible(false)}
+                onConfirm={handleLogout}
+                confirmText="Keluar"
+            />
         </View>
     );
 };
