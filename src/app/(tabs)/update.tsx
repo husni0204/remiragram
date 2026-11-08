@@ -10,11 +10,11 @@ import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Client-side cap for profile photo uploads — same policy as the create-post
-// screen: downscale so the longest side <= MAX_DIMENSION and re-encode as JPEG
-// at UPLOAD_QUALITY before hitting the API. Keeps payloads small while
-// staying sharp enough for the avatar (rendered at w-24 / 96px).
-const MAX_DIMENSION = 1080;
+// Client-side cap for profile photo uploads — downscale so the longest side
+// <= MAX_DIMENSION and re-encode as JPEG at UPLOAD_QUALITY before hitting the
+// API. Avatar is rendered at w-24 (96px, ~192px on retina), so 512px gives a
+// comfortable margin without shipping a multi-megapixel original.
+const MAX_DIMENSION = 512;
 const UPLOAD_QUALITY = 0.7;
 
 const resizeImage = async (uri: string): Promise<string> => {
@@ -53,6 +53,26 @@ const UpdateProfileScreen = () => {
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: UPLOAD_QUALITY,
+      aspect: [1, 1],
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setImage(await resizeImage(uri));
+    }
+  };
+
+  // Open the phone camera to capture a new profile photo
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission", "Izin kamera ditolak. Aktifkan izin kamera di pengaturan HP.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
       quality: UPLOAD_QUALITY,
       aspect: [1, 1],
@@ -128,9 +148,15 @@ const UpdateProfileScreen = () => {
             )}
           </View>
 
-          <TouchableOpacity onPress={pickImage}>
-            <Text className="mt-3 text-blue-500">Ganti Photo Profile</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center justify-center gap-2 mt-3">
+            <TouchableOpacity onPress={pickImage}>
+              <Text className="text-blue-500 text-sm">Pilih Galeri</Text>
+            </TouchableOpacity>
+            <Text className="text-gray-400 text-sm">•</Text>
+            <TouchableOpacity onPress={takePhoto}>
+              <Text className="text-blue-500 text-sm">Ambil Foto</Text>
+            </TouchableOpacity>
+          </View>
 
           {image && (
             <TouchableOpacity
