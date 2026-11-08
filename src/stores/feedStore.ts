@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Feed } from "@/src/types/feed";
-import { devtools, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import customAPI from "@/src/config/api";
 
 interface FeedState {
@@ -18,6 +19,10 @@ interface FeedState {
   setLoading: (loading: boolean) => void;
   setRefreshing: (refreshing: boolean) => void;
 }
+
+// AsyncStorage storage for Zustand persist — PABAYA / recommended way
+// in React Native / Expo. Avoids the "setItem of undefined" crash.
+const storage = createJSONStorage(() => AsyncStorage);
 
 export const useFeedStore = create<FeedState>()(
   devtools(
@@ -54,7 +59,16 @@ export const useFeedStore = create<FeedState>()(
           set({ refreshing: false });
         },
       }),
-      { name: "feed-store" }
+      {
+        name: "feed-store",
+        storage,
+        // Don't persist transient state — only the feed data
+        partialize: (state) => ({
+          posts: state.posts,
+          page: state.page,
+          totalPages: state.totalPages,
+        }),
+      }
     )
   )
 );
