@@ -1,3 +1,4 @@
+import CustomAlert from "@/src/components/CustomAlert";
 import customAPI from "@/src/config/api";
 import FormatDate from "@/src/config/date";
 import { useAuthStore } from "@/src/stores/authStore";
@@ -5,9 +6,10 @@ import { DetailFeed } from "@/src/types/feed";
 import { colors } from "@/src/utils/color";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS } from "react-native"; // For iOS, we can use ActionSheet; Android will use custom modal
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DetailFeedScreen = () => {
@@ -15,6 +17,10 @@ const DetailFeedScreen = () => {
   const router = useRouter();
   const { user } = useAuthStore();
   const [content, setContent] = useState<string>("");
+  const [isDeletePostModalVisible, setDeletePostModalVisible] = useState(false);
+  const [isDeleteCommentModalVisible, setDeleteCommentModalVisible] = useState(false);
+  const [commentToDeleteId, setCommentToDeleteId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // Query for post data
   const {
@@ -41,24 +47,59 @@ const DetailFeedScreen = () => {
     },
   });
 
+  // Mutation for deleting a post
+  const deletePostMutation = useMutation<any, any, string, unknown>({
+    mutationFn: (postId: string) => customAPI.delete(`/feed/${postId}`),
+    onSuccess: () => {
+      Alert.alert("Success", "Postingan berhasil dihapus.");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      router.back();
+    },
+    onError: (error: any) => {
+      Alert.alert("Error", error.response?.data?.message ?? "Gagal menghapus postingan.");
+    },
+  });
+
   // Mutation for deleting a comment
   const deleteCommentMutation = useMutation<any, any, string, unknown>({
     mutationFn: (commentId: string) => customAPI.delete(`/comment/${commentId}`),
     onSuccess: () => {
-      Alert.alert("Delete", "Berhasil menghapus komentar");
+      Alert.alert("Success", "Berhasil menghapus komentar.");
+      setDeleteCommentModalVisible(false);
+      setCommentToDeleteId(null);
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.message ?? "Gagal menghapus komentar");
+      Alert.alert("Error", error.response?.data?.message ?? "Gagal menghapus komentar.");
+      setDeleteCommentModalVisible(false);
+      setCommentToDeleteId(null);
     },
   });
+
+  const handleConfirmDeletePost = () => {
+    if (id) {
+      deletePostMutation.mutate(id as string);
+      setDeletePostModalVisible(false);
+    }
+  };
+
+  const handleConfirmDeleteComment = () => {
+    if (commentToDeleteId) {
+      deleteCommentMutation.mutate(commentToDeleteId);
+    }
+  };
 
   const handleCreateComment = () => {
     if (!content.trim()) return;
     createCommentMutation.mutate({ content, postId: id as string });
   };
 
-  const handleDeleteComment = (commentId: string) => {
-    deleteCommentMutation.mutate(commentId);
+  const handleDeletePostPress = () => {
+    setDeletePostModalVisible(true);
+  };
+
+  const handleDeleteCommentPress = (commentId: string) => {
+    setCommentToDeleteId(commentId);
+    setDeleteCommentModalVisible(true);
   };
 
   if (isLoading) {
@@ -86,7 +127,13 @@ const DetailFeedScreen = () => {
             <Feather name="arrow-left" size={24} color={"#111"} />
           </TouchableOpacity>
           <Text className="text-lg font-semibold">Detail Post</Text>
-          <Feather name="more-vertical" size={22} color={"#111"} />
+          {user?.id === post.user.id ? (
+            <TouchableOpacity onPress={handleDeletePostPress}>
+              <Feather name="trash" size={22} color={"red"} />
+            </TouchableOpacity>
+          ) : (
+            <Feather name="more-vertical" size={22} color={"#111"} />
+          )}
         </View>
 
         {/* Content */}
@@ -135,7 +182,7 @@ const DetailFeedScreen = () => {
                   {post.comments.map((item, index) => (
                     <View
                       className="flex-row justify-between flex-1 mb-1"
-                      key={index}
+                      key={item.id} // Use item.id as key
                     >
                       <View className="flex-1 mb-3">
                         <Text>
@@ -145,7 +192,7 @@ const DetailFeedScreen = () => {
                         <Text className="mt-2 text-xs text-gray-700">{FormatDate(item.createdAt)}</Text>
                       </View>
                       {user?.id === item.user.id && (
-                        <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
+                        <TouchableOpacity onPress={() => handleDeleteCommentPress(item.id)}>
                           <Feather name="trash" size={15} color={"red"} />
                         </TouchableOpacity>
                       )}
@@ -171,6 +218,23 @@ const DetailFeedScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Custom Alerts */}
+        <CustomAlert
+          isVisible={isDeletePostModalVisible}
+          title="Hapus Postingan"
+          message="Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan."
+          onCancel={() => setDeletePostModalVisible(false)}
+          onConfirm={handleConfirmDeletePost}
+        />
+
+        <CustomAlert
+          isVisible={isDeleteCommentModalVisible}
+          title="Hapus Komentar"
+          message="Apakah Anda yakin ingin menghapus komentar ini? Tindakan ini tidak dapat dibatalkan."
+          onCancel={() => setDeleteCommentModalVisible(false)}
+          onConfirm={handleConfirmDeleteComment}
+        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
