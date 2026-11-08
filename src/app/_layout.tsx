@@ -2,8 +2,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, NativeModules, Platform, View } from "react-native";
 import { useAuthStore } from "../stores/authStore";
+
+// Disable the React Native Element Inspector overlay that shows
+// an "Inspect Element" dev tool in the emulator / dev builds.
+// This is a no-op on production builds.
+if (Platform.OS === "android" && NativeModules.DevMenu) {
+  try {
+    NativeModules.DevMenu.disable();
+  } catch {
+    /* DevMenu may not exist on this RN version */
+  }
+}
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -15,13 +26,6 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-    // const [fontsLoaded] = useFonts({
-    //   Parisienne-Reggular: require("../assets/fonts/Parisienne-Regular.ttf"),
-    //   Poppins-Regular: require("../assets/fonts/Poppins-Regular.ttf"),
-    //   Montserrat-VariableFont: require("../assets/fonts/Montserrat-VariableFont_wght.ttf"),
-    //   Montserrat-Italic-VariableFont_wght: require("../assets/fonts/Montserrat-Italic-VariableFont_wght.ttf"),
-    // });
-
     const ParisienneRegular = require("../assets/fonts/Parisienne-Regular.ttf");
     const PoppinsRegular = require("../assets/fonts/Poppins-Regular.ttf");
     const MontserratVariableFont = require("../assets/fonts/Montserrat-VariableFont_wght.ttf");
