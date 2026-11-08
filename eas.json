@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 7.0.0",
-    "appVersionClaim": "1.0.0"
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -18,12 +18,12 @@
   "submit": {
     "production": {
       "android": {
-        track: "internal",
-        releaseStatus: "draft"
+        "track": "internal",
+        "releaseStatus": "draft"
       },
       "ios": {
-        submitToAppStore: false,
-        appleId: null
+        "submitToAppStore": false,
+        "appleTeamId": null
       }
     }
   }

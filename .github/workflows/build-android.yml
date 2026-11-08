@@ -1,9 +1,17 @@
 name: Build Android (Play Store)
 
 on:
-  push:
-    branches: [main, master]
+  # Trigger manual via GitHub UI (Actions tab) HANYA, sampai setup EAS selesai
+  # Ganti kembali ke push: setelah EXPO_TOKEN + EXPO_PROJECT_ID di-set di secrets
   workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - 'android'
 
 jobs:
   build-android:
@@ -50,7 +58,7 @@ jobs:
         working-directory: android
 
       - name: Build Android AAB
-        run: eas build --platform android --profile production --non-interactive
+        run: eas build --platform ${{ inputs.platform || 'android' }} --profile production --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 

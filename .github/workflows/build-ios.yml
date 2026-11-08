@@ -1,9 +1,17 @@
 name: Build iOS (TestFlight)
 
 on:
-  push:
-    branches: [main, master]
+  # Trigger manual via GitHub UI (Actions tab) HANYA, sampai setup EAS selesai
+  # Ganti kembali ke push: setelah EXPO_TOKEN + EXPO_PROJECT_ID di-set di secrets
   workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'ios'
+        type: choice
+        options:
+          - 'ios'
 
 jobs:
   build-ios:
@@ -32,7 +40,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build iOS IPA
-        run: eas build --platform ios --profile production --non-interactive
+        run: eas build --platform ${{ inputs.platform || 'ios' }} --profile production --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
