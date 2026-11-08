@@ -2,12 +2,45 @@ import Header from "@/src/components/Header";
 import customAPI from "@/src/config/api";
 import { useAuthStore } from "@/src/stores/authStore";
 import { FontAwesome } from "@expo/vector-icons";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Client-side cap for profile photo uploads — same policy as the create-post
+// screen: downscale so the longest side <= MAX_DIMENSION and re-encode as JPEG
+// at UPLOAD_QUALITY before hitting the API. Keeps payloads small while
+// staying sharp enough for the avatar (rendered at w-24 / 96px).
+const MAX_DIMENSION = 1080;
+const UPLOAD_QUALITY = 0.7;
+
+const resizeImage = async (uri: string): Promise<string> => {
+  try {
+    const size = await new Promise<{ width: number; height: number }>(
+      (resolve, reject) =>
+        Image.getSize(uri, (w, h) => resolve({ width: w, height: h }), reject)
+    );
+
+    if (Math.max(size.width, size.height) <= MAX_DIMENSION) return uri;
+
+    const scale = MAX_DIMENSION / Math.max(size.width, size.height);
+    const targetW = Math.round(size.width * scale);
+
+    const { uri: outUri } = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: targetW } }],
+      { compress: UPLOAD_QUALITY, format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    return outUri;
+  } catch (e) {
+    console.log("resizeImage (profile): keeping original on failure", e);
+    return uri;
+  }
+};
 
 const UpdateProfileScreen = () => {
   const { user, setTokenData, token } = useAuthStore();
@@ -21,12 +54,13 @@ const UpdateProfileScreen = () => {
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 1,
+      quality: UPLOAD_QUALITY,
       aspect: [1, 1],
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setImage(await resizeImage(uri));
     }
   };
 
