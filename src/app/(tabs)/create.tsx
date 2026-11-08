@@ -86,24 +86,24 @@ const CreateScreen = () => {
                 <Image source={{ uri: image }} className="w-full h-64 rounded-lg mb-4" />
                 <TouchableOpacity
                   onPress={takePhoto}
-                  className="flex-row items-center justify-center mb-3"
+                  className="flex-row items-center justify-center"
                 >
-                  <Feather name="camera" size={18} color="#09637E" />
-                  <Text className="ml-2 text-active font-medium">Retake Foto</Text>
+                  <Feather name="camera" size={14} color="#09637E" />
+                  <Text className="ml-2 text-xs text-active font-medium">Retake</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <>
                 <TouchableOpacity onPress={pickImage} className="w-full mb-3">
-                  <View className="w-full h-64 rounded-xl bg-gray-200 justify-center items-center">
-                    <Feather name="image" size={40} color={"gray"} />
-                    <Text className="text-gray-500 mt-4">Pilih dari Galeri</Text>
+                  <View className="w-full h-56 rounded-xl bg-gray-200 justify-center items-center">
+                    <Feather name="image" size={32} color={"gray"} />
+                    <Text className="text-gray-500 mt-2">Pilih dari Galeri</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={takePhoto} className="w-full">
-                  <View className="w-full h-40 rounded-xl bg-active justify-center items-center">
-                    <Feather name="camera" size={36} color="#fff" />
-                    <Text className="text-white font-medium mt-3">Ambil Foto (Kamera)</Text>
+                <TouchableOpacity onPress={takePhoto}>
+                  <View className="flex-row items-center justify-center rounded-lg bg-active px-4 py-3">
+                    <Feather name="camera" size={16} color="#fff" />
+                    <Text className="text-white text-sm font-medium ml-2">Ambil Foto</Text>
                   </View>
                 </TouchableOpacity>
               </>
