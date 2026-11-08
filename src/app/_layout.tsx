@@ -2,19 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, NativeModules, Platform, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "../stores/authStore";
 
-// Disable the React Native Element Inspector overlay that shows
-// an "Inspect Element" dev tool in the emulator / dev builds.
-// This is a no-op on production builds.
-if (Platform.OS === "android" && NativeModules.DevMenu) {
-  try {
-    NativeModules.DevMenu.disable();
-  } catch {
-    /* DevMenu may not exist on this RN version */
-  }
-}
+// The React Native Element Inspector overlay is controlled via the Dev Menu:
+//   shake device -> "Toggle Inspect Element" -> off
+// There is no public API to disable it from JS at module-load time in RN 0.84+.
+// In production builds (EAS / release), this overlay never appears.
 
 const queryClient = new QueryClient({
     defaultOptions: {
