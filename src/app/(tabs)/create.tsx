@@ -14,8 +14,27 @@ const CreateScreen = () => {
 
   const router = useRouter();
 
+  // Pick image from gallery (existing behaviour)
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  // Open camera & capture a new photo
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission", "Izin kamera ditolak. Aktifkan izin kamera di pengaturan HP.");
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ["images"],
       quality: 1,
     });
@@ -43,7 +62,7 @@ const CreateScreen = () => {
       router.push("/(tabs)");
     },
     onError: (error) => {
-      console.log("Errornya apa mas ? : ", error);
+      console.log("Error creating post:", error);
       Alert.alert("Error", "Gagal membuat postingan");
     },
   });
@@ -63,14 +82,31 @@ const CreateScreen = () => {
         <View className="p-5">
           <View className="bg-white rounded-2xl p-4 shadow mb-5">
             {image ? (
-              <Image source={{ uri: image }} className="w-full h-64 rounded-lg mb-4" />
+              <>
+                <Image source={{ uri: image }} className="w-full h-64 rounded-lg mb-4" />
+                <TouchableOpacity
+                  onPress={takePhoto}
+                  className="flex-row items-center justify-center mb-3"
+                >
+                  <Feather name="camera" size={18} color="#09637E" />
+                  <Text className="ml-2 text-active font-medium">Retake Foto</Text>
+                </TouchableOpacity>
+              </>
             ) : (
-              <TouchableOpacity onPress={pickImage}>
-                <View className="w-full h-64 rounded-xl bg-gray-200 justify-center items-center mb-4">
-                  <Feather name="image" size={40} color={"gray"} />
-                  <Text className="text-gray-500 mt-40">Upload Gambar Postingan</Text>
-                </View>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity onPress={pickImage} className="w-full mb-3">
+                  <View className="w-full h-64 rounded-xl bg-gray-200 justify-center items-center">
+                    <Feather name="image" size={40} color={"gray"} />
+                    <Text className="text-gray-500 mt-4">Pilih dari Galeri</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={takePhoto} className="w-full">
+                  <View className="w-full h-40 rounded-xl bg-active justify-center items-center">
+                    <Feather name="camera" size={36} color="#fff" />
+                    <Text className="text-white font-medium mt-3">Ambil Foto (Kamera)</Text>
+                  </View>
+                </TouchableOpacity>
+              </>
             )}
           </View>
 
