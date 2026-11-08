@@ -1,105 +1,96 @@
+import CustomAlert from "@/src/components/CustomAlert";
 import customAPI from "@/src/config/api";
 import { useAuthStore } from "@/src/stores/authStore";
-import { Link, useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import CustomAlert from "@/src/components/CustomAlert";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
-  const { setTokenData } = useAuthStore();
-  const router = useRouter();
-  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean }>({
-    visible: false, title: "", message: "", isError: false
-  });
+    const { setTokenData } = useAuthStore();
+    const router = useRouter();
+    const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean }>({
+        visible: false,
+        title: "",
+        message: "",
+        isError: false,
+    });
 
-  const loginMutation = useMutation<
-    any,
-    any,
-    { email: string; password: string },
-    unknown
-  >({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      customAPI.post("/auth/login", { email, password }),
-    onSuccess: (res) => {
-      const data = res.data;
-      setTokenData(data.data, data.token);
-      setAlert({ visible: true, title: "Berhasil", message: "Anda telah berhasil login.", isError: false });
-    },
-    onError: (error: any) => {
-      const errorMsg = error.response?.data?.message;
-      const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
-      setAlert({ visible: true, title: "Error", message: errorData ?? "Terjadi kesalahan", isError: true });
-    },
-  });
+    const loginMutation = useMutation<any, any, { email: string; password: string }, unknown>({
+        mutationFn: ({ email, password }: { email: string; password: string }) => customAPI.post("/auth/login", { email, password }),
+        onSuccess: (res) => {
+            const data = res.data;
+            setTokenData(data.data, data.token);
+            setAlert({ visible: true, title: "Berhasil", message: "Anda telah berhasil login.", isError: false });
+        },
+        onError: (error: any) => {
+            const errorMsg = error.response?.data?.message;
+            const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
+            setAlert({ visible: true, title: "Error", message: errorData ?? "Terjadi kesalahan", isError: true });
+        },
+    });
 
-  const handleAlertConfirm = () => {
-    setAlert({ ...alert, visible: false });
-    if (!alert.isError) {
-      router.push("/(tabs)");
-    }
-  };
+    const handleAlertConfirm = () => {
+        setAlert({ ...alert, visible: false });
+        if (!alert.isError) {
+            router.push("/(tabs)");
+        }
+    };
 
-  // Local form state (still using useState for inputs)
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+    // Local form state (still using useState for inputs)
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
 
-  const handleLogin = () => {
-    loginMutation.mutate({ email, password });
-  };
+    const handleLogin = () => {
+        loginMutation.mutate({ email, password });
+    };
 
-  return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <SafeAreaView className="android:justify-center android:flex-1 android:px-8 ios:justify-center ios:flex-1 ios:px-8 bg-background">
-        <View className="android:items-center ios:items-center">
-          <Text className="android:text-4xl android:font-title android:text-active ios:pt-3 ios:text-6xl ios:font-title ios:text-active">RemiraGram</Text>
-          <Text className="mt-2 text-gray-500">Welcome 😀</Text>
-        </View>
-        <View className="mt-5">
-          <TextInput
-            placeholder="Email"
-            className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TextInput
-            placeholder="Password"
-            className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          <TouchableOpacity
-            className="items-center p-4 mb-6 bg-active rounded-xl"
-            onPress={handleLogin}
-            disabled={loginMutation.isPending}
-          >
-              {loginMutation.isPending ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className="text-base font-semibold text-white">Login</Text>
-              )}
-          </TouchableOpacity>
-        </View>
-        <View className="flex-row items-center justify-center mb-10">
-          <Text className="text-gray-500">Don't have an account ? </Text>
-          <Link href="/(auth)/register" className="font-semibold text-active">Sign up</Link>
-        </View>
+    return (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <SafeAreaView className="android:justify-center android:flex-1 android:px-8 ios:justify-center ios:flex-1 ios:px-8 bg-background">
+                <View className="android:items-center ios:items-center">
+                    <Text className="android:text-4xl android:font-title android:text-active ios:pt-3 ios:text-6xl ios:font-title ios:text-active">RemiraGram</Text>
+                    <Text className="mt-2 text-gray-500">Welcome 😀</Text>
+                </View>
+                <View className="mt-5">
+                    <TextInput
+                        placeholder="Email"
+                        className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+                    <TextInput
+                        placeholder="Password"
+                        className="android:px-4 android:mb-4 ios:px-4 ios:py-2 ios:mb-4 android:bg-gray-300 ios:bg-green-200 android:rounded-xl ios:rounded-xl"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                    />
+                    <TouchableOpacity className="items-center p-4 mb-6 bg-active rounded-xl" onPress={handleLogin} disabled={loginMutation.isPending}>
+                        {loginMutation.isPending ? <ActivityIndicator color="#fff" /> : <Text className="text-base font-semibold text-white">Login</Text>}
+                    </TouchableOpacity>
+                </View>
+                <View className="flex-row items-center justify-center mb-10">
+                    <Text className="text-gray-500">Don't have an account ? </Text>
+                    <Link href="/(auth)/register" className="font-semibold text-active">
+                        Sign up
+                    </Link>
+                </View>
 
-        <CustomAlert
-          isVisible={alert.visible}
-          title={alert.title}
-          message={alert.message}
-          showCancel={false}
-          confirmText={alert.isError ? "Coba Lagi" : "Lanjutkan"}
-          onConfirm={handleAlertConfirm}
-        />
-      </SafeAreaView>
-    </KeyboardAvoidingView>
-  );
+                <CustomAlert
+                    isVisible={alert.visible}
+                    title={alert.title}
+                    message={alert.message}
+                    showCancel={false}
+                    confirmText={alert.isError ? "Coba Lagi" : "Lanjutkan"}
+                    onConfirm={handleAlertConfirm}
+                />
+            </SafeAreaView>
+        </KeyboardAvoidingView>
+    );
 };
 
 export default LoginScreen;
