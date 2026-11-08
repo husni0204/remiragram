@@ -1,61 +1,29 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Feather, FontAwesome } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, TouchableOpacity } from "react-native";
-import customAPI from "../config/api";
+import React from "react";
+import { TouchableOpacity } from "react-native";
 import { colors } from "../utils/color";
+import { useBookmarksStore } from "../stores/bookmarksStore";
 
 const ButtonBookmark = ({ postId }: { postId: string }) => {
-    const [saved, setSaved] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
+  const bookmarkedPosts = useBookmarksStore((state) => state.bookmarkedPosts);
+  const toggleBookmark = useBookmarksStore((state) => state.toggleBookmark);
 
-    const checkBookmarkPost = async () => {
-        setLoading(true);
-        try {
-            const { data } = await customAPI.get(`/bookmark/${Number(postId)}`);
-            // console.log("ini datanya :", data.data)
-            setSaved(data.data);
-        } catch (error) {
-            console.log("error check bookmark :", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const isBookmarked = bookmarkedPosts.has(postId);
 
-    useEffect(() => {
-        checkBookmarkPost();
-    }, []);
-
-    const toggleSavedPost = async () => {
-        try {
-            await customAPI.post(`/bookmark/${Number(postId)}`);
-            checkBookmarkPost();
-        } catch (error) {
-            console.log("error bookmark :", error);
-        }
-    };
-
-    if (loading) {
-        return (
-            <TouchableOpacity>
-                <ActivityIndicator color={colors.active} />
-            </TouchableOpacity>
-        );
-    }
-
-    return (
-        <>
-            {saved ? (
-                <TouchableOpacity onPress={toggleSavedPost} disabled={loading}>
-                    <FontAwesome name="bookmark" size={24} color={colors.active} />
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity onPress={toggleSavedPost} disabled={loading}>
-                    <Feather name="bookmark" size={24} color={colors.inactive} />
-                </TouchableOpacity>
-            )}
-        </>
-    );
+  return (
+    <>
+      {isBookmarked ? (
+        <TouchableOpacity onPress={() => toggleBookmark(postId)} testID="bookmark-button">
+          <FontAwesome name="bookmark" size={24} color={colors.active} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={() => toggleBookmark(postId)} testID="bookmark-button">
+          <Feather name="bookmark" size={24} color={colors.inactive} />
+        </TouchableOpacity>
+      )}
+    </>
+  );
 };
 
 export default ButtonBookmark;

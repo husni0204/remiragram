@@ -1,8 +1,18 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { useAuthStore } from "../stores/authStore";
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 5 * 60 * 1000,
+            retry: 1,
+        },
+    },
+});
 
 export default function RootLayout() {
     // const [fontsLoaded] = useFonts({
@@ -30,15 +40,17 @@ export default function RootLayout() {
 
     useEffect(() => {
         loadToken();
-    }, [loadToken, token]);
+    }, [loadToken]);
 
-    if (!fontsLoaded || isLoading) {
-        return (
-            <View className="items-center justify-center flex-1">
-                <ActivityIndicator size={"large"} />
-            </View>
-        );
-    }
-
-    return <Stack screenOptions={{ headerShown: false }}>{!token || !user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}</Stack>;
+    return (
+        <QueryClientProvider client={queryClient}>
+            {!fontsLoaded || isLoading ? (
+                <View className="items-center justify-center flex-1">
+                    <ActivityIndicator size={"large"} />
+                </View>
+            ) : (
+                <Stack screenOptions={{ headerShown: false }}>{!token || !user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}</Stack>
+            )}
+        </QueryClientProvider>
+    );
 }

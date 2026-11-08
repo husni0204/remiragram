@@ -1,5 +1,6 @@
 import { AuthState } from "@/src/types/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -8,25 +9,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     isLoading: false,
 
     setTokenData: async (user, token) => {
-        const authData = {
-            user: user,
-            token: token,
-        };
-        await AsyncStorage.setItem("auth", JSON.stringify(authData));
-        set({ user: user, token: token });
+        // Token → SecureStore (aman)
+        await SecureStore.setItemAsync("auth_token", token);
+        // User → AsyncStorage (bukan rahasia, ukuran bisa lebih besar)
+        await AsyncStorage.setItem("auth_user", JSON.stringify(user));
+
+        set({ user, token });
     },
 
     loadToken: async () => {
         set({ isLoading: true });
         try {
-            const data = await AsyncStorage.getItem("auth");
+            const [token, userRaw] = await Promise.all([SecureStore.getItemAsync("auth_token"), AsyncStorage.getItem("auth_user")]);
 
-            if (data) {
-                const parsed = JSON.parse(data);
-                set({
-                    user: parsed.user,
-                    token: parsed.token,
-                });
+            if (token && userRaw) {
+                set({ user: JSON.parse(userRaw), token });
             }
         } catch (error) {
             console.log("Error loading token:", error);
@@ -36,7 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     removeToken: async () => {
-        await AsyncStorage.removeItem("auth");
+        await Promise.all([SecureStore.deleteItemAsync("auth_token"), AsyncStorage.removeItem("auth_user")]);
         set({ token: null, user: null });
     },
 }));

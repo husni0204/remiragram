@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 7.0.0",
+    "appVersionClaim": "1.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        track: "internal",
+        releaseStatus: "draft"
+      },
+      "ios": {
+        submitToAppStore: false,
+        appleId: null
+      }
+    }
+  }
+}

@@ -1,70 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import customAPI from "@/src/config/api";
-import { useAuthStore } from "@/src/stores/authStore";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { TouchableOpacity } from "react-native";
+import { useFollowStore } from "../../stores/followStore";
 
 const ButtonFollow = ({ userId }: { userId: number }) => {
-    const { user } = useAuthStore();
-    const [checkUser, setCheckUser] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
+  const following = useFollowStore((state) => state.following);
+  const toggleFollow = useFollowStore((state) => state.toggleFollow);
 
-    const checkFollowUser = async () => {
-        setLoading(true);
-        try {
-            const { data } = await customAPI.get(`/follow/${userId}`);
-            // console.log("ini datanya :", data)
-            setCheckUser(data.data);
-        } catch (error) {
-            console.log("error check follow :", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const isFollowing = following.has(userId);
 
-    const unFollowUser = async () => {
-        try {
-            await customAPI.delete(`/follow/${userId}`);
-            checkFollowUser();
-        } catch (error) {
-            console.log("error unfollow :", error);
-        }
-    };
-
-    const followUser = async () => {
-        try {
-            await customAPI.post(`/follow`, { followUserId: userId });
-            checkFollowUser();
-        } catch (error) {
-            console.log("error unfollow :", error);
-        }
-    };
-
-    useEffect(() => {
-        checkFollowUser();
-    }, []);
-
-    if (loading) {
-        return (
-            <TouchableOpacity className="mx-5 p-5 rounded-full items-center bg-gray-500">
-                <ActivityIndicator color={"fff"} />
-            </TouchableOpacity>
-        );
-    }
-
-    return (
-        <>
-            {user && user.id.toString() === userId.toString() ? null : checkUser ? (
-                <TouchableOpacity className="mx-5 p-5 rounded-full items-center bg-red-500" onPress={unFollowUser}>
-                    <Text className="font-semibold text-white">UnFollow</Text>
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity className="mx-5 p-5 rounded-full items-center bg-active" onPress={followUser}>
-                    <Text className="font-semibold text-white">Follow</Text>
-                </TouchableOpacity>
-            )}
-        </>
-    );
+  return (
+    <TouchableOpacity onPress={() => toggleFollow(userId)} testID="follow-button" style={{ padding: 8 }}>
+      <Feather name={isFollowing ? "user-check" : "user-plus"} size={24} color={isFollowing ? "#3b82f6" : "#6b7280"} />
+    </TouchableOpacity>
+  );
 };
 
 export default ButtonFollow;
