@@ -9,6 +9,15 @@ jest.mock("@/src/stores/authStore", () => ({
   useAuthStore: () => ({ user: { id: "1", username: "test" } }),
 }));
 
+// Mock API so toggle mutations don't hit the network
+jest.mock("@/src/config/api", () => ({
+  __esModule: true,
+  default: {
+    post: jest.fn(() => Promise.resolve({ data: { data: { liked: true } } })),
+    get: jest.fn(() => Promise.resolve({ data: { data: true } })),
+  },
+}));
+
 // Create a query client for React Query context
 const queryClient = new QueryClient();
 

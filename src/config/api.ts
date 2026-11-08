@@ -4,6 +4,10 @@ const baseURL = process.env.EXPO_PUBLIC_API_URL;
 
 const customAPI = axios.create({
     baseURL: baseURL + "/api",
+    timeout: 10000, // 10 detik timeout
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 // Attach Authorization header from the auth store (source of truth).
@@ -22,20 +26,45 @@ customAPI.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
+}, (error) => {
+    console.error('[API] Request error:', error);
+    return Promise.reject(error);
 });
 
-// On 401, clear the session and let the router redirect to /login.
+// Response interceptor with better error handling
 customAPI.interceptors.response.use(
-    (res) => res,
+    (res) => {
+        return res;
+    },
     async (err) => {
-        if (err.response?.status === 401) {
+        const originalRequest = err.config;
+        
+        // Log error details
+        console.error(`[API] Error ${err.response?.status} ${err.config?.url}:`, 
+            err.response?.data || err.message);
+        
+        // Handle 401 - token expired
+        if (err.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
             try {
                 const { useAuthStore } = require("@/src/stores/authStore");
                 await useAuthStore.getState().removeToken();
-            } catch {
-                /* ignore */
+            } catch (e) {
+                console.error('[API] Failed to clear auth:', e);
             }
         }
+        
+        // Handle network errors
+        if (!err.response) {
+            console.error('[API] Network error - backend mungkin tidak jalan:', err.message);
+            // Custom error with more info
+            const networkError = new Error(
+                'Tidak dapat terhubung ke server. Pastikan backend berjalan di ' + baseURL
+            );
+            networkError.name = 'NetworkError';
+            return Promise.reject(networkError);
+        }
+        
         return Promise.reject(err);
     }
 );

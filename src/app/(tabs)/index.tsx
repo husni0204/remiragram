@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const index = () => {
   const { user } = useAuthStore();
-  console.log("User data :", user?.fullname);
 
   // Feed state managed by Zustand store
   const { posts, loading, refreshing, fetchNext, refresh } = useFeedStore();

@@ -19,15 +19,40 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     loadToken: async () => {
         set({ isLoading: true });
+        
+        // Hard timeout - force isLoading=false after 8 seconds no matter what
+        const hardTimeout = setTimeout(() => {
+            console.warn('[AuthStore] HARD TIMEOUT - forcing isLoading=false');
+            set({ isLoading: false });
+        }, 8000);
+        
+        // Timeout wrapper untuk mencegah hang
+        const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T | null> => {
+            return Promise.race([
+                promise,
+                new Promise<null>((_, reject) => 
+                    setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms)
+                )
+            ]).catch((err) => {
+                console.warn(`[AuthStore] ${label} failed:`, err.message);
+                return null;
+            });
+        };
+
         try {
-            const [token, userRaw] = await Promise.all([SecureStore.getItemAsync("auth_token"), AsyncStorage.getItem("auth_user")]);
+            const [token, userRaw] = await Promise.all([
+                withTimeout(SecureStore.getItemAsync("auth_token"), 3000, 'SecureStore'),
+                withTimeout(AsyncStorage.getItem("auth_user"), 3000, 'AsyncStorage')
+            ]);
 
             if (token && userRaw) {
-                set({ user: JSON.parse(userRaw), token });
+                const parsedUser = JSON.parse(userRaw);
+                set({ user: parsedUser, token });
             }
         } catch (error) {
-            console.log("Error loading token:", error);
+            console.error('[AuthStore] Error loading token:', error);
         } finally {
+            clearTimeout(hardTimeout);
             set({ isLoading: false });
         }
     },

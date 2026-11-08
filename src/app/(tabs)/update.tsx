@@ -7,7 +7,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import CustomAlert from "@/src/components/CustomAlert";
+import { ActivityIndicator, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Client-side cap for profile photo uploads — downscale so the longest side
@@ -36,8 +37,7 @@ const resizeImage = async (uri: string): Promise<string> => {
     );
 
     return outUri;
-  } catch (e) {
-    console.log("resizeImage (profile): keeping original on failure", e);
+  } catch {
     return uri;
   }
 };
@@ -47,6 +47,12 @@ const UpdateProfileScreen = () => {
   const router = useRouter();
 
   const [image, setImage] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean; onConfirm?: () => void }>({
+    visible: false,
+    title: "",
+    message: "",
+    isError: false,
+  });
   const [username, setUsername] = useState<string>(user?.username ?? "");
   const [fullname, setFullname] = useState<string>(user?.fullname ?? "");
   const [bio, setBio] = useState<string | null | undefined>(user?.bio);
@@ -68,7 +74,7 @@ const UpdateProfileScreen = () => {
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission", "Izin kamera ditolak. Aktifkan izin kamera di pengaturan HP.");
+      setAlert({ visible: true, title: "Permission", message: "Izin kamera ditolak. Aktifkan izin kamera di pengaturan HP.", isError: true });
       return;
     }
 
@@ -101,11 +107,11 @@ const UpdateProfileScreen = () => {
     onSuccess: (res) => {
       const data = res.data;
       setTokenData(data.data, data.token);
-      Alert.alert("Success", "Photo profile berhasil diupdate");
+      setAlert({ visible: true, title: "Success", message: "Photo profile berhasil diupdate", isError: false, onConfirm: () => setImage(null) });
       setImage(null);
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.message ?? "Gagal mengupdate photo profile");
+      setAlert({ visible: true, title: "Error", message: error.message ?? "Gagal mengupdate photo profile", isError: true });
     },
   });
 
@@ -116,12 +122,12 @@ const UpdateProfileScreen = () => {
     onSuccess: (res) => {
       const data = res.data;
       setTokenData(data.data, data.token);
-      Alert.alert("Success", "Profile berhasil diupdate");
+      setAlert({ visible: true, title: "Success", message: "Profile berhasil diupdate", isError: false });
     },
     onError: (error: any) => {
       const errorMsg = error.response?.data?.message;
       const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
-      Alert.alert("Error", errorData ?? "Gagal mengupdate profile");
+      setAlert({ visible: true, title: "Error", message: errorData ?? "Gagal mengupdate profile", isError: true });
     },
   });
 

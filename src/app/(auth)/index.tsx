@@ -4,11 +4,15 @@ import { Link, useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useState } from "react";
+import CustomAlert from "@/src/components/CustomAlert";
 
 const LoginScreen = () => {
   const { setTokenData } = useAuthStore();
   const router = useRouter();
+  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean }>({
+    visible: false, title: "", message: "", isError: false
+  });
 
   const loginMutation = useMutation<
     any,
@@ -21,19 +25,25 @@ const LoginScreen = () => {
     onSuccess: (res) => {
       const data = res.data;
       setTokenData(data.data, data.token);
-      Alert.alert("Success", "Berhasil Login");
-      router.push("/(tabs)");
+      setAlert({ visible: true, title: "Berhasil", message: "Anda telah berhasil login.", isError: false });
     },
     onError: (error: any) => {
       const errorMsg = error.response?.data?.message;
       const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
-      Alert.alert("Error", errorData ?? "Terjadi kesalahan");
+      setAlert({ visible: true, title: "Error", message: errorData ?? "Terjadi kesalahan", isError: true });
     },
   });
 
+  const handleAlertConfirm = () => {
+    setAlert({ ...alert, visible: false });
+    if (!alert.isError) {
+      router.push("/(tabs)");
+    }
+  };
+
   // Local form state (still using useState for inputs)
-  const [email, setEmail] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleLogin = () => {
     loginMutation.mutate({ email, password });
@@ -78,6 +88,15 @@ const LoginScreen = () => {
           <Text className="text-gray-500">Don't have an account ? </Text>
           <Link href="/(auth)/register" className="font-semibold text-active">Sign up</Link>
         </View>
+
+        <CustomAlert
+          isVisible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          showCancel={false}
+          confirmText={alert.isError ? "Coba Lagi" : "Lanjutkan"}
+          onConfirm={handleAlertConfirm}
+        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

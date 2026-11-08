@@ -6,10 +6,11 @@ interface CustomAlertProps {
   isVisible: boolean;
   title: string;
   message: string;
-  onCancel: () => void;
+  onCancel?: () => void; // Optional
   onConfirm: () => void;
   confirmText?: string;
   cancelText?: string;
+  showCancel?: boolean; // New prop
 }
 
 const CustomAlert: React.FC<CustomAlertProps> = ({
@@ -18,19 +19,22 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
   message,
   onCancel,
   onConfirm,
-  confirmText = "Hapus",
+  confirmText = "OK",
   cancelText = "Batal",
+  showCancel = true, // Default true
 }) => {
   return (
-    <Modal isVisible={isVisible} onBackdropPress={onCancel} animationIn="zoomIn" animationOut="zoomOut">
+    <Modal isVisible={isVisible} onBackdropPress={showCancel ? onCancel : undefined} animationIn="zoomIn" animationOut="zoomOut">
       <View className="bg-white rounded-2xl p-6 items-center">
         <Text className="text-xl font-bold mb-2">{title}</Text>
         <Text className="text-gray-600 mb-6 text-center">{message}</Text>
         <View className="flex-row gap-4">
-          <TouchableOpacity onPress={onCancel} className="px-6 py-3 bg-gray-200 rounded-lg">
-            <Text className="text-gray-700 font-semibold">{cancelText}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onConfirm} className="px-6 py-3 bg-red-500 rounded-lg">
+          {showCancel && (
+            <TouchableOpacity onPress={onCancel} className="px-6 py-3 bg-gray-200 rounded-lg">
+              <Text className="text-gray-700 font-semibold">{cancelText}</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={onConfirm} className="px-6 py-3 bg-active rounded-lg">
             <Text className="text-white font-semibold">{confirmText}</Text>
           </TouchableOpacity>
         </View>

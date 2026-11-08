@@ -1,7 +1,8 @@
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import React from "react";
-import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import CustomAlert from "@/src/components/CustomAlert";
 import customAPI from "../config/api";
 import { useAuthStore } from "../stores/authStore";
 import { Feed } from "../types/feed";
@@ -11,16 +12,18 @@ import ButtonLike from "./ButtonLike";
 
 const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void> }) => {
     const router = useRouter();
-
     const { user } = useAuthStore();
+    const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string }>(
+        { visible: false, title: "", message: "" }
+    );
 
     const handleDeletePost = async (postId: string) => {
         try {
             await customAPI.delete(`/feed/${postId}`);
             onReload();
-            Alert.alert("Delete", "Berhasil menghapus postingan!");
-        } catch (error) {
-            console.log("Ini errornya mas : ", error);
+            setAlert({ visible: true, title: "Delete", message: "Berhasil menghapus postingan!" });
+        } catch {
+            setAlert({ visible: true, title: "Error", message: "Gagal menghapus postingan" });
         }
     };
 
@@ -67,7 +70,19 @@ const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void
             <View className="flex-row justify-between px-4 py-3">
                 <View className="flex-row gap-2">
                     <ButtonLike postId={item.id.toString()} />
-                    <Feather name="message-circle" size={24} color={colors.inactive} />
+                    <TouchableOpacity
+                        onPress={() =>
+                            router.push({
+                                pathname: "/(detail)/post/[id]",
+                                params: { id: item.id },
+                            })
+                        }
+                        testID="comment-button"
+                        className="flex-row items-center gap-1"
+                    >
+                        <Feather name="message-circle" size={24} color={colors.inactive} />
+                        <Text className="text-sm text-gray-500">{item.commentCount}</Text>
+                    </TouchableOpacity>
                 </View>
                 <ButtonBookmark postId={item.id.toString()} />
             </View>
@@ -78,6 +93,16 @@ const ListPost = ({ item, onReload }: { item: Feed; onReload: () => Promise<void
                     {item.caption}
                 </Text>
             </View>
+
+            {/* Custom Alert */}
+            <CustomAlert
+                isVisible={alert.visible}
+                title={alert.title}
+                message={alert.message}
+                showCancel={false}
+                confirmText="OK"
+                onConfirm={() => setAlert({ ...alert, visible: false })}
+            />
         </View>
     );
 };

@@ -47,8 +47,8 @@ export const useFeedStore = create<FeedState>()(
             const { data } = await customAPI.get(`/feed?page=${page}&limit=2`);
             get().addPosts(data.data);
             set({ totalPages: data.totalPages, page: page + 1 });
-          } catch (e) {
-            console.log("Error fetching feed", e);
+          } catch {
+            // Abaikan error fetch (data lama tetap ditampilkan)
           } finally {
             set({ loading: false });
           }

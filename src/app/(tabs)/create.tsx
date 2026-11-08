@@ -51,8 +51,7 @@ const resizeImage = async (uri: string): Promise<string> => {
 
     void targetH; // Specifying only width preserves aspect ratio automatically.
     return outUri;
-  } catch (e) {
-    console.log("resizeImage: keeping original on failure", e);
+  } catch {
     return uri;
   }
 };
@@ -112,8 +111,7 @@ const CreateScreen = () => {
       Alert.alert("Sukses", "Postingan berhasil dibuat");
       router.push("/(tabs)");
     },
-    onError: (error) => {
-      console.log("Error creating post:", error);
+    onError: () => {
       Alert.alert("Error", "Gagal membuat postingan");
     },
   });

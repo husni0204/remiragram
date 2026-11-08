@@ -13,10 +13,9 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             await removeToken();
-            setLogoutModalVisible(false);
-            router.replace("/"); // Redirect to login
-        } catch (error) {
-            console.log("Error during logout:", error);
+            // Tidak perlu setLogoutModalVisible(false) karena component akan di-unmount
+            router.replace("/(auth)"); 
+        } catch {
             setLogoutModalVisible(false);
         }
     };

@@ -4,11 +4,15 @@ import { Link, useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useState } from "react";
+import CustomAlert from "@/src/components/CustomAlert";
 
 const RegisterScreen = () => {
   const { setTokenData } = useAuthStore();
   const router = useRouter();
+  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean }>({
+      visible: false, title: "", message: "", isError: false
+  });
 
   const registerMutation = useMutation<
     any,
@@ -21,15 +25,21 @@ const RegisterScreen = () => {
     onSuccess: (res) => {
       const data = res.data;
       setTokenData(data.data, data.token);
-      Alert.alert("Success", "Berhasil Register!");
-      router.push("/(tabs)");
+      setAlert({ visible: true, title: "Success", message: "Berhasil Register!", isError: false });
     },
     onError: (error: any) => {
       const errorMsg = error.response?.data?.message;
       const errorData = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
-      Alert.alert("Error", errorData ?? "Terjadi kesalahan");
+      setAlert({ visible: true, title: "Error", message: errorData ?? "Terjadi kesalahan", isError: true });
     },
   });
+
+  const handleAlertConfirm = () => {
+      setAlert({ ...alert, visible: false });
+      if (!alert.isError) {
+          router.push("/(tabs)");
+      }
+  };
 
   const [email, setEmail] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
@@ -64,6 +74,15 @@ const RegisterScreen = () => {
           <Text className="text-gray-500">Already have an account ? </Text>
           <Link href="/(auth)" className="font-semibold text-active">Sign in</Link>
         </View>
+
+        <CustomAlert
+          isVisible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          showCancel={false}
+          confirmText="OK"
+          onConfirm={handleAlertConfirm}
+        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

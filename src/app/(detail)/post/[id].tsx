@@ -5,6 +5,8 @@ import { useAuthStore } from "@/src/stores/authStore";
 import { DetailFeed } from "@/src/types/feed";
 import { colors } from "@/src/utils/color";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
+import ButtonLike from "@/src/components/ButtonLike";
+import ButtonBookmark from "@/src/components/ButtonBookmark";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -16,10 +18,17 @@ const DetailFeedScreen = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuthStore();
+  const [commentToDeleteId, setCommentToDeleteId] = useState<string | null>(null);
   const [content, setContent] = useState<string>("");
   const [isDeletePostModalVisible, setDeletePostModalVisible] = useState(false);
   const [isDeleteCommentModalVisible, setDeleteCommentModalVisible] = useState(false);
-  const [commentToDeleteId, setCommentToDeleteId] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ visible: boolean; title: string; message: string; isError: boolean; onConfirm: () => void }>({
+    visible: false,
+    title: "",
+    message: "",
+    isError: false,
+    onConfirm: () => {},
+  });
   const queryClient = useQueryClient();
 
   // Query for post data
@@ -39,11 +48,11 @@ const DetailFeedScreen = () => {
     mutationFn: ({ content, postId }) => customAPI.post("/comment", { content, postId }),
     onSuccess: () => {
       setContent("");
-      // Invalidate post query to refetch comments
-      // (cannot directly invalidate here without query client, so we rely on page refresh)
+      // Refetch post (including comments) to show the new comment instantly
+      queryClient.invalidateQueries({ queryKey: ["post", id] });
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.response?.data?.message ?? "Gagal membuat komentar");
+      setAlert({ visible: true, title: "Error", message: error.response?.data?.message ?? "Gagal membuat komentar", isError: true, onConfirm: () => {} });
     },
   });
 
@@ -51,12 +60,11 @@ const DetailFeedScreen = () => {
   const deletePostMutation = useMutation<any, any, string, unknown>({
     mutationFn: (postId: string) => customAPI.delete(`/feed/${postId}`),
     onSuccess: () => {
-      Alert.alert("Success", "Postingan berhasil dihapus.");
+      setAlert({ visible: true, title: "Success", message: "Postingan berhasil dihapus.", isError: false, onConfirm: () => { router.back(); } });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      router.back();
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.response?.data?.message ?? "Gagal menghapus postingan.");
+      setAlert({ visible: true, title: "Error", message: error.response?.data?.message ?? "Gagal menghapus postingan.", isError: true, onConfirm: () => {} });
     },
   });
 
@@ -64,13 +72,13 @@ const DetailFeedScreen = () => {
   const deleteCommentMutation = useMutation<any, any, string, unknown>({
     mutationFn: (commentId: string) => customAPI.delete(`/comment/${commentId}`),
     onSuccess: () => {
-      Alert.alert("Success", "Berhasil menghapus komentar.");
-      setDeleteCommentModalVisible(false);
+      setAlert({ visible: true, title: "Success", message: "Berhasil menghapus komentar.", isError: false, onConfirm: () => {} });
+      // Refetch post to remove the deleted comment from UI
+      queryClient.invalidateQueries({ queryKey: ["post", id] });
       setCommentToDeleteId(null);
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.response?.data?.message ?? "Gagal menghapus komentar.");
-      setDeleteCommentModalVisible(false);
+      setAlert({ visible: true, title: "Error", message: error.response?.data?.message ?? "Gagal menghapus komentar.", isError: true, onConfirm: () => {} });
       setCommentToDeleteId(null);
     },
   });
@@ -84,6 +92,8 @@ const DetailFeedScreen = () => {
 
   const handleConfirmDeleteComment = () => {
     if (commentToDeleteId) {
+      // Close the confirmation modal first
+      setDeleteCommentModalVisible(false);
       deleteCommentMutation.mutate(commentToDeleteId);
     }
   };
@@ -205,7 +215,18 @@ const DetailFeedScreen = () => {
             </View>
           </ScrollView>
 
-          {/* comment input */}
+          <CustomAlert
+          isVisible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          showCancel={alert.isError}
+          confirmText={alert.isError ? "OK" : "Lanjutkan"}
+          onCancel={() => setAlert({ ...alert, visible: false })}
+          onConfirm={() => {
+            setAlert({ ...alert, visible: false });
+            if (!alert.isError && alert.onConfirm) alert.onConfirm();
+          }}
+        />
           <View className="flex-row items-center px-4 py-3 bg-white border-t border-gray-100">
             <TextInput
               placeholder="Add comment.."
